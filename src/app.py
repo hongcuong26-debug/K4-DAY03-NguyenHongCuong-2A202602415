@@ -118,22 +118,23 @@ def run_react_agent(user_query: str, provider, mcp_server: MCPAcademicServer) ->
                 print(f"👁️ [Observation từ MCP Server]: {obs_str}")
                 
                 # Tổng hợp Final Answer từ kết quả Observation thực tế
+                # Tổng hợp Final Answer từ kết quả Observation thực tế của HR System
+                # Tổng hợp Final Answer từ kết quả Observation thực tế của HR System
                 if obs_data.get("status") == "SUCCESS":
                     if "data" in obs_data:
                         d = obs_data["data"]
                         final_answer = (
-                            f"Kết quả tra cứu cho sinh viên {obs_data.get('student_id', '')} ({d.get('full_name', '')}): "
-                            f"Lớp {d.get('class', '')}, GPA: {d.get('gpa', '')}, Email: {d.get('email', '')}, "
-                            f"Trạng thái: {d.get('status', '')}, Cố vấn: {d.get('advisor', '')}."
+                            f"Thông tin nhân viên {obs_data.get('employee_id', '')} ({d.get('full_name', '')}): "
+                            f"Phòng ban: {d.get('department', '')}, Số ngày phép còn lại: {d.get('leave_balance', '')} ngày."
                         )
                     elif "message" in obs_data:
                         final_answer = obs_data["message"]
                     else:
-                        final_answer = f"Đã hoàn tất xử lý qua MCP Server: {json.dumps(obs_data, ensure_ascii=False)}"
+                        final_answer = f"Xử lý thành công qua HR MCP Server: {json.dumps(obs_data, ensure_ascii=False)}"
                 elif obs_data.get("status") == "NOT_FOUND":
-                    final_answer = obs_data.get("message", "Không tìm thấy thông tin sinh viên yêu cầu.")
+                    final_answer = obs_data.get("message", "Không tìm thấy dữ liệu nhân viên.")
                 else:
-                    final_answer = f"Phản hồi từ công cụ: {json.dumps(obs_data, ensure_ascii=False)}"
+                    final_answer = f"Phản hồi từ hệ thống: {json.dumps(obs_data, ensure_ascii=False)}"
             
             trace_logs.append({
                 "step": step,

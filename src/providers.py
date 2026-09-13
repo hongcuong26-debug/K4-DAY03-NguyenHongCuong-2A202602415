@@ -2,12 +2,28 @@
 🔌 MULTI-PROVIDER LLM ADAPTER (Google Gemini, OpenAI & Offline Mock)
 Hỗ trợ Native Tool Calling và chuyển đổi linh hoạt qua biến môi trường LLM_PROVIDER.
 """
+import os
+from anthropic import Anthropic
+from dotenv import load_dotenv
 
+load_dotenv()
+
+client = Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+
+def call_claude_agent(prompt: str, system_prompt: str):
+    response = client.messages.create(
+        model="claude-3-5-sonnet-20241022",  # Hoặc claude-3-haiku-20240307
+        max_tokens=1000,
+        system=system_prompt,
+        messages=[
+            {"role": "user", "content": prompt}
+        ]
+    )
+    return response.content[0].text
 import os
 import sys
 import json
 from typing import Dict, Any, List
-from dotenv import load_dotenv
 
 if sys.stdout.encoding != 'utf-8':
     try:
@@ -37,26 +53,28 @@ class MockOfflineProvider(BaseLLMProvider):
     def generate_with_tools(self, prompt: str, tools_schema: List[Dict[str, Any]], system_prompt: str = "") -> Dict[str, Any]:
         prompt_lower = prompt.lower()
         
-        # Mô phỏng nhận diện intent gọi Tool
-        if "sv2026001" in prompt_lower and "đặt lịch" in prompt_lower:
+        # Mô phỏng nhận diện intent gọi Tool HR
+        if "xin nghỉ" in prompt_lower or "tạo đơn" in prompt_lower:
             return {
                 "type": "tool_call",
-                "tool_name": "schedule_appointment",
-                "arguments": {"student_id": "SV2026001", "datetime_str": "14:00 15/09/2026", "advisor_name": "PGS.TS Nguyễn Văn A"},
-                "thought": "Người dùng yêu cầu đặt lịch hẹn tư vấn cho sinh viên SV2026001. Tôi sẽ gọi tool schedule_appointment."
+                "tool_name": "submit_leave_request",
+                "arguments": {"employee_id": "EMP001", "start_date": "2026-10-01", "end_date": "2026-10-02", "reason": "Nghỉ mát"},
+                "thought": "Người dùng muốn tạo đơn xin nghỉ phép. Tôi sẽ gọi tool submit_leave_request."
             }
-        elif "sv2026001" in prompt_lower or "tra cứu" in prompt_lower:
+        elif "emp" in prompt_lower or "ngày phép" in prompt_lower:
+            # Lấy mã nhân viên từ câu hỏi (ví dụ EMP001, EMP999)
+            emp_id = "EMP001" if "emp001" in prompt_lower else ("EMP999" if "emp999" in prompt_lower else "EMP001")
             return {
                 "type": "tool_call",
-                "tool_name": "academic_query",
-                "arguments": {"student_id": "SV2026001"},
-                "thought": "Người dùng muốn tra cứu thông tin học vụ của sinh viên SV2026001. Tôi sẽ gọi tool academic_query."
+                "tool_name": "get_leave_balance",
+                "arguments": {"employee_id": emp_id},
+                "thought": f"Người dùng muốn tra cứu số ngày phép của nhân viên {emp_id}. Tôi sẽ gọi tool get_leave_balance."
             }
         else:
             return {
                 "type": "text",
-                "content": f"[Mock Agent Response]: Xin chào! Quy chế học vụ VinUni yêu cầu sinh viên tích lũy tối thiểu 120 tín chỉ và duy trì GPA trên 2.0 để tốt nghiệp.",
-                "thought": "Câu hỏi chung về quy chế học vụ, trả lời trực tiếp không cần gọi Tool."
+                "content": "Xin chào! Tôi là Trợ lý Nhân sự VinFast. Bạn có thể tra cứu ngày phép hoặc gửi đơn xin nghỉ phép.",
+                "thought": "Câu hỏi chung, trả lời trực tiếp."
             }
 
 

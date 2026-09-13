@@ -1,0 +1,37 @@
+[
+  {
+    "id": "TC01",
+    "type": "direct_query",
+    "question": "Cho tôi biết chính sách nghỉ phép năm của VinFast như thế nào?",
+    "expected_behavior": "Agent trả lời trực tiếp về quy định nghỉ phép chung.",
+    "complexity": "Low"
+  },
+  {
+    "id": "TC02",
+    "type": "single_tool_query",
+    "question": "Tôi là nhân viên EMP001, tra cứu giúp tôi xem còn bao nhiêu ngày phép?",
+    "expected_behavior": "Agent gọi tool get_leave_balance với employee_id: EMP001.",
+    "complexity": "Medium"
+  },
+  {
+    "id": "TC03",
+    "type": "leave_request",
+    "question": "Tôi là EMP001, tạo đơn xin nghỉ phép từ 2026-10-01 đến 2026-10-02 lý do đi du lịch.",
+    "expected_behavior": "Agent gọi tool submit_leave_request với đủ 4 tham số.",
+    "complexity": "Medium"
+  },
+  {
+    "id": "TC04",
+    "type": "multi_step_reasoning",
+    "question": "Tôi là EMP001, kiểm tra số ngày phép trước rồi đăng ký nghỉ từ 2026-11-05 đến 2026-11-06 lý do giải quyết việc riêng.",
+    "expected_behavior": "Agent kiểm tra ngày phép bằng get_leave_balance trước, sau đó mới gọi submit_leave_request.",
+    "complexity": "High"
+  },
+  {
+    "id": "TC05",
+    "type": "edge_case_handling",
+    "question": "Tra cứu số ngày phép cho nhân viên mã EMP999.",
+    "expected_behavior": "Agent trả về phản hồi NOT_FOUND lịch sự.",
+    "complexity": "Medium"
+  }
+]
